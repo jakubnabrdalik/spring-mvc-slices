@@ -3,6 +3,7 @@ package eu.solidcraft.film
 import eu.solidcraft.base.IntegrationSpec
 import eu.solidcraft.film.domain.FilmFacade
 import eu.solidcraft.film.domain.FilmFacadeOperations
+import org.junit.After
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.ResultActions
@@ -15,6 +16,11 @@ class FilmControllerAcceptanceSpec extends IntegrationSpec implements FilmFacade
 
     @Autowired
     FilmFacade filmFacade
+
+    @After
+    void removeFilms() {
+        filmFacade.delete(trumper.title, clingon.title)
+    }
 
     @WithMockUser
     def "should get films"() {

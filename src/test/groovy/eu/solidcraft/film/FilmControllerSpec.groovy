@@ -1,33 +1,32 @@
 package eu.solidcraft.film
 
+import eu.solidcraft.base.IntegrationSpec
 import eu.solidcraft.film.domain.FilmFacade
 import eu.solidcraft.film.domain.FilmFacadeOperations
+import org.junit.After
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.data.domain.PageImpl
-import org.springframework.data.domain.Pageable
 import org.springframework.security.test.context.support.WithMockUser
-import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
-import spock.lang.Specification
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@WebMvcTest([FilmController, FilmController2, FilmTestConfig])
-class FilmControllerSpec extends Specification implements FilmFacadeOperations {
-    
+class FilmControllerSpec extends IntegrationSpec implements FilmFacadeOperations {
+
     @Autowired
     FilmFacade filmFacade
 
-    @Autowired
-    MockMvc mockMvc
+    @After
+    void removeFilms() {
+        filmFacade.delete(trumper.title, clingon.title)
+    }
 
     @WithMockUser
     def "should get films"() {
         given: 'inventory has "American Clingon Bondage"'
-            filmFacade.findAll(_) >> { Pageable pageable -> new PageImpl([trumper, clingon], pageable, 2) }
+            filmFacade.add(trumper)
+            filmFacade.add(clingon)
 
         when: 'I go to /film'
             ResultActions getFilms = mockMvc.perform(get("/films"))
@@ -46,7 +45,7 @@ class FilmControllerSpec extends Specification implements FilmFacadeOperations {
     @WithMockUser
     def "should get film"() {
         given: 'inventory has an old film "American Clingon Bondage" and a new release of "50 shades of Trumpet"'
-            filmFacade.show(clingon.title) >> clingon
+            filmFacade.add(clingon)
 
         when: 'I go to /films'
             ResultActions getFilm = mockMvc.perform(get("/film/$clingon.title"))
